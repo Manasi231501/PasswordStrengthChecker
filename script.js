@@ -1,149 +1,388 @@
-body {
-    font-family: Arial, sans-serif;
-    background: linear-gradient(
-        135deg,
-        #831843 50%,
-        #831843 45%,
-        #FFD1DC 45%,
-        #FFD1DC  50%
-    );
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    margin: 0;
-    Color: #000000;
+function checkPassword() {
+
+    let password = document.getElementById("password").value;
+
+    let result = document.getElementById("result");
+
+    let suggestions = document.getElementById("suggestions");
+
+    let score = 0;
+
+    let suggestionList = [];
+
+
+    // Empty password
+
+    if (password.length === 0) {
+
+        result.innerHTML = "Please enter a password";
+
+        suggestions.innerHTML = "";
+
+        return;
+    }
+
+
+    // Check length
+
+    if (password.length >= 8) {
+
+        score += 20;
+
+    }
+    else {
+
+        suggestionList.push("Use at least 8 characters");
+
+    }
+
+
+    // Check uppercase
+
+    if (/[A-Z]/.test(password)) {
+
+        score += 20;
+
+    }
+    else {
+
+        suggestionList.push("Add at least one uppercase letter");
+
+    }
+
+
+    // Check lowercase
+
+    if (/[a-z]/.test(password)) {
+
+        score += 20;
+
+    }
+    else {
+
+        suggestionList.push("Add at least one lowercase letter");
+
+    }
+
+
+    // Check number
+
+    if (/[0-9]/.test(password)) {
+
+        score += 20;
+
+    }
+    else {
+
+        suggestionList.push("Add at least one number");
+
+    }
+
+
+    // Check special character
+
+    if (/[^A-Za-z0-9]/.test(password)) {
+
+        score += 20;
+
+    }
+    else {
+
+        suggestionList.push("Add at least one special character");
+
+    }
+
+
+    // Repeated pattern check
+
+    let repeatedPattern = checkRepeatedPattern(password);
+
+
+    if (repeatedPattern) {
+
+        score -= 20;
+
+        suggestionList.push(
+            "Avoid repeated patterns like " + repeatedPattern
+        );
+
+    }
+
+
+    // Prevent negative score
+
+    if (score < 0) {
+
+        score = 0;
+
+    }
+
+
+    // Password strength
+
+    let strength;
+
+
+    if (score <= 40) {
+
+        strength = "Weak";
+
+    }
+    else if (score <= 70) {
+
+        strength = "Medium";
+
+    }
+    else {
+
+        strength = "Strong";
+
+    }
+
+
+    // Display score and strength
+
+    result.innerHTML =
+        "Password Strength: " + strength +
+        "<br>Security Score: " + score + "/100";
+
+
+    // Display suggestions
+
+    if (suggestionList.length > 0) {
+
+        suggestions.innerHTML =
+            "<b>Suggestions:</b>" +
+            "<ol>" +
+            suggestionList.map(function(item) {
+
+                return "<li>" + item + "</li>";
+
+            }).join("") +
+            "</ol>";
+
+    }
+    else {
+
+        suggestions.innerHTML =
+            "<b>Suggestions:</b>" +
+            "<ol>" +
+            "<li>Your password has good strength!</li>" +
+            "</ol>";
+
+    }
+
 }
 
-.container {
-    background: #E4ADC4;
-    width: 400px;
-    padding: 35px;
-    border-radius: 15px;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
-    text-align: center;
+
+// Repeated Pattern Detection
+
+function checkRepeatedPattern(password) {
+
+
+    // Check same character repeated
+
+    if (/^(.)\1+$/.test(password)) {
+
+        return "repeated characters";
+
+    }
+
+
+    // Check repeated blocks like abcabc, 123123, ababab
+
+    for (let size = 1; size <= password.length / 2; size++) {
+
+        let part = password.substring(0, size);
+
+        let repeated = true;
+
+
+        for (let i = size; i < password.length; i += size) {
+
+            if (
+                password.substring(i, i + size) !== part
+            ) {
+
+                repeated = false;
+
+                break;
+
+            }
+
+        }
+
+
+        if (repeated && password.length % size === 0) {
+
+            return part + part;
+
+        }
+
+    }
+
+
+    return null;
+
 }
 
-h1 {
-    margin-bottom: 10px;
-    color: #831843;
+
+// Show / Hide Password
+
+function togglePassword() {
+
+    let password = document.getElementById("password");
+
+
+    if (password.type === "password") {
+
+        password.type = "text";
+
+    }
+    else {
+
+        password.type = "password";
+
+    }
+
 }
 
-p {
-    color: #666;
-    margin-bottom: 25px;
+
+// Password Requirements
+
+document.getElementById("password").addEventListener("input", function () {
+
+    let password = this.value;
+
+
+    // Length
+
+    if (password.length >= 8) {
+
+        document.getElementById("length").innerHTML =
+            "At least 8 characters";
+
+        document.getElementById("length").className = "valid";
+
+    }
+    else {
+
+        document.getElementById("length").innerHTML =
+            "At least 8 characters";
+
+        document.getElementById("length").className = "invalid";
+
+    }
+
+
+    // Uppercase
+
+    if (/[A-Z]/.test(password)) {
+
+        document.getElementById("uppercase").innerHTML =
+            "Uppercase letter";
+
+        document.getElementById("uppercase").className = "valid";
+
+    }
+    else {
+
+        document.getElementById("uppercase").innerHTML =
+            "Uppercase letter";
+
+        document.getElementById("uppercase").className = "invalid";
+
+    }
+
+
+    // Lowercase
+
+    if (/[a-z]/.test(password)) {
+
+        document.getElementById("lowercase").innerHTML =
+            "Lowercase letter";
+
+        document.getElementById("lowercase").className = "valid";
+
+    }
+    else {
+
+        document.getElementById("lowercase").innerHTML =
+            "Lowercase letter";
+
+        document.getElementById("lowercase").className = "invalid";
+
+    }
+
+
+    // Number
+
+    if (/[0-9]/.test(password)) {
+
+        document.getElementById("number").innerHTML =
+            "Number";
+
+        document.getElementById("number").className = "valid";
+
+    }
+    else {
+
+        document.getElementById("number").innerHTML =
+            "Number";
+
+        document.getElementById("number").className = "invalid";
+
+    }
+
+
+    // Special character
+
+    if (/[^A-Za-z0-9]/.test(password)) {
+
+        document.getElementById("special").innerHTML =
+            "Special character";
+
+        document.getElementById("special").className = "valid";
+
+    }
+    else {
+
+        document.getElementById("special").innerHTML =
+            "Special character";
+
+        document.getElementById("special").className = "invalid";
+
+    }
+
+});
+
+function resetPassword() {
+
+    document.getElementById("password").value = "";
+
+    document.getElementById("result").innerHTML = "";
+
+    document.getElementById("suggestions").innerHTML = "";
+
+    document.getElementById("length").innerHTML =
+        "At least 8 characters";
+    document.getElementById("length").className = "invalid";
+
+    document.getElementById("uppercase").innerHTML =
+        "Uppercase letter";
+    document.getElementById("uppercase").className = "invalid";
+
+    document.getElementById("lowercase").innerHTML =
+        "Lowercase letter";
+    document.getElementById("lowercase").className = "invalid";
+
+    document.getElementById("number").innerHTML =
+        "Number";
+    document.getElementById("number").className = "invalid";
+
+    document.getElementById("special").innerHTML =
+        "Special character";
+    document.getElementById("special").className = "invalid";
 }
 
-label {
-    display: block;
-    text-align: left;
-    margin-bottom: 8px;
-    font-weight: bold;
-}
 
-input {
-    width: 100%;
-    padding: 12px;
-    box-sizing: border-box;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    font-size: 16px;
-    margin-bottom: 20px;
-}
-
-.password-box {
-    position: relative;
-    width: 100%;
-}
-
-.password-box input {
-    width: 100%;
-    padding-right: 50px;
-}
-
-.password-box button {
-    position: absolute;
-    right: 5px;
-    top: 5px;
-    width: 40px;
-    padding: 8px;
-    background: transparent;
-    color: #BE185D;
-    font-size: 18px;
-}
-
-.password-box button:hover {
-    background: transparent;
-}
-
-button {
-    width: 100%;
-    padding: 12px;
-    border: none;
-    border-radius: 8px;
-    background: #9333EA;
-    color: white;
-    font-size: 16px;
-    cursor: pointer;
-}
-
-button:hover {
-    background: #6D28D9;
-}
-
-#result {
-    margin-top: 25px;
-    line-height: 2;
-}
-
-#suggestions {
-    margin-top: 15px;
-    text-align: left;
-}
-
-.requirements {
-    text-align: left;
-    margin: 20px 0;
-    padding: 10px;
-    background: #FFF1F7;
-    border-radius: 8px;
-}
-
-.requirements h3 {
-    margin-top: 5px;
-    margin-bottom: 10px;
-}
-
-.requirements ul {
-    padding-left: 25px;
-    margin: 0;
-}
-
-.requirements li {
-    margin: 8px 0;
-    font-size: 14px;
-}
-
-.requirements li.valid {
-    color: green;
-}
-
-.requirements li.invalid {
-    color: red;
-}
-
-.reset-btn {
-    margin-top: 10px;
-    background: #9333EA;
-    color: white;
-}
-
-.reset-btn:hover {
-    background: #6D28D9;
-}
-.privacy-message {
-    margin-top: 20px;
-    color: #2563EB;
-    font-size: 14px;
-    font-weight: bold;
-}
