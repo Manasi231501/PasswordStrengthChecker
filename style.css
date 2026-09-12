@@ -105,7 +105,7 @@ button:hover {
     text-align: left;
     margin: 20px 0;
     padding: 10px;
-    background: #FFF1F7S;
+    background: #FFF1F7;
     border-radius: 8px;
 }
 
