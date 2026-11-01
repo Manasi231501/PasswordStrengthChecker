@@ -1,388 +1,338 @@
+
+// =================================
+// Password Strength Checker
+// =================================
+
+// Toggle Password Visibility
+function togglePassword() {
+    let passwordInput = document.getElementById("password");
+
+    if (passwordInput.type === "password") {
+        passwordInput.type = "text";
+    } else {
+        passwordInput.type = "password";
+    }
+}
+
+
+// Check Repeated Pattern
+function checkRepeatedPattern(password) {
+
+    if (/^(.)\1+$/.test(password)) {
+        return true;
+    }
+
+    for (let i = 1; i <= password.length / 2; i++) {
+        let pattern = password.substring(0, i);
+
+        if (password === pattern.repeat(password.length / i)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+// Check Password Strength
 function checkPassword() {
 
     let password = document.getElementById("password").value;
 
-    let result = document.getElementById("result");
-
-    let suggestions = document.getElementById("suggestions");
-
     let score = 0;
-
-    let suggestionList = [];
-
-
-    // Empty password
+    let suggestions = [];
 
     if (password.length === 0) {
+        document.getElementById("result").innerHTML =
+            "Please enter a password";
 
-        result.innerHTML = "Please enter a password";
-
-        suggestions.innerHTML = "";
-
+        document.getElementById("suggestions").innerHTML = "";
         return;
     }
 
-
-    // Check length
-
     if (password.length >= 8) {
-
         score += 20;
-
+    } else {
+        suggestions.push("Use at least 8 characters.");
     }
-    else {
-
-        suggestionList.push("Use at least 8 characters");
-
-    }
-
-
-    // Check uppercase
 
     if (/[A-Z]/.test(password)) {
-
         score += 20;
-
+    } else {
+        suggestions.push("Add an uppercase letter.");
     }
-    else {
-
-        suggestionList.push("Add at least one uppercase letter");
-
-    }
-
-
-    // Check lowercase
 
     if (/[a-z]/.test(password)) {
-
         score += 20;
-
+    } else {
+        suggestions.push("Add a lowercase letter.");
     }
-    else {
-
-        suggestionList.push("Add at least one lowercase letter");
-
-    }
-
-
-    // Check number
 
     if (/[0-9]/.test(password)) {
-
         score += 20;
-
+    } else {
+        suggestions.push("Add a number.");
     }
-    else {
-
-        suggestionList.push("Add at least one number");
-
-    }
-
-
-    // Check special character
 
     if (/[^A-Za-z0-9]/.test(password)) {
-
         score += 20;
-
-    }
-    else {
-
-        suggestionList.push("Add at least one special character");
-
+    } else {
+        suggestions.push("Add a special character.");
     }
 
-
-    // Repeated pattern check
-
-    let repeatedPattern = checkRepeatedPattern(password);
-
-
-    if (repeatedPattern) {
-
+    if (checkRepeatedPattern(password)) {
         score -= 20;
-
-        suggestionList.push(
-            "Avoid repeated patterns like " + repeatedPattern
-        );
-
+        suggestions.push("Avoid repeated characters or patterns.");
     }
-
-
-    // Prevent negative score
 
     if (score < 0) {
-
         score = 0;
-
     }
 
-
-    // Password strength
-
-    let strength;
-
+    let result = document.getElementById("result");
 
     if (score <= 40) {
-
-        strength = "Weak";
-
-    }
+        result.innerHTML = "Password Strength: Weak (" + score + "%)";
+    } 
     else if (score <= 70) {
-
-        strength = "Medium";
-
-    }
+        result.innerHTML = "Password Strength: Medium (" + score + "%)";
+    } 
     else {
-
-        strength = "Strong";
-
+        result.innerHTML = "Password Strength: Strong (" + score + "%)";
     }
 
-
-    // Display score and strength
-
-    result.innerHTML =
-        "Password Strength: " + strength +
-        "<br>Security Score: " + score + "/100";
-
-
-    // Display suggestions
-
-    if (suggestionList.length > 0) {
-
-        suggestions.innerHTML =
-            "<b>Suggestions:</b>" +
-            "<ol>" +
-            suggestionList.map(function(item) {
-
-                return "<li>" + item + "</li>";
-
-            }).join("") +
-            "</ol>";
-
+    if (suggestions.length > 0) {
+        document.getElementById("suggestions").innerHTML =
+            "<h3>Suggestions:</h3><ul><li>" +
+            suggestions.join("</li><li>") +
+            "</li></ul>";
+    } else {
+        document.getElementById("suggestions").innerHTML =
+            "Your password meets all requirements!";
     }
-    else {
-
-        suggestions.innerHTML =
-            "<b>Suggestions:</b>" +
-            "<ol>" +
-            "<li>Your password has good strength!</li>" +
-            "</ol>";
-
-    }
-
 }
 
 
-// Repeated Pattern Detection
-
-function checkRepeatedPattern(password) {
-
-
-    // Check same character repeated
-
-    if (/^(.)\1+$/.test(password)) {
-
-        return "repeated characters";
-
-    }
-
-
-    // Check repeated blocks like abcabc, 123123, ababab
-
-    for (let size = 1; size <= password.length / 2; size++) {
-
-        let part = password.substring(0, size);
-
-        let repeated = true;
-
-
-        for (let i = size; i < password.length; i += size) {
-
-            if (
-                password.substring(i, i + size) !== part
-            ) {
-
-                repeated = false;
-
-                break;
-
-            }
-
-        }
-
-
-        if (repeated && password.length % size === 0) {
-
-            return part + part;
-
-        }
-
-    }
-
-
-    return null;
-
-}
-
-
-// Show / Hide Password
-
-function togglePassword() {
-
-    let password = document.getElementById("password");
-
-
-    if (password.type === "password") {
-
-        password.type = "text";
-
-    }
-    else {
-
-        password.type = "password";
-
-    }
-
-}
-
-
-// Password Requirements
-
+// Update Password Requirements Automatically
 document.getElementById("password").addEventListener("input", function () {
 
     let password = this.value;
 
+    let requirements = [
+        {
+            id: "length",
+            condition: password.length >= 8,
+            text: "At least 8 characters"
+        },
+        {
+            id: "uppercase",
+            condition: /[A-Z]/.test(password),
+            text: "Uppercase letter"
+        },
+        {
+            id: "lowercase",
+            condition: /[a-z]/.test(password),
+            text: "Lowercase letter"
+        },
+        {
+            id: "number",
+            condition: /[0-9]/.test(password),
+            text: "Number"
+        },
+        {
+            id: "special",
+            condition: /[^A-Za-z0-9]/.test(password),
+            text: "Special character"
+        }
+    ];
 
-    // Length
+    requirements.forEach(function (item) {
 
-    if (password.length >= 8) {
+        let element = document.getElementById(item.id);
 
-        document.getElementById("length").innerHTML =
-            "At least 8 characters";
+        if (item.condition) {
+            element.innerHTML = "✓ " + item.text;
+            element.className = "valid";
+        } else {
+            element.innerHTML = "✗ " + item.text;
+            element.className = "invalid";
+        }
 
-        document.getElementById("length").className = "valid";
-
-    }
-    else {
-
-        document.getElementById("length").innerHTML =
-            "At least 8 characters";
-
-        document.getElementById("length").className = "invalid";
-
-    }
-
-
-    // Uppercase
-
-    if (/[A-Z]/.test(password)) {
-
-        document.getElementById("uppercase").innerHTML =
-            "Uppercase letter";
-
-        document.getElementById("uppercase").className = "valid";
-
-    }
-    else {
-
-        document.getElementById("uppercase").innerHTML =
-            "Uppercase letter";
-
-        document.getElementById("uppercase").className = "invalid";
-
-    }
-
-
-    // Lowercase
-
-    if (/[a-z]/.test(password)) {
-
-        document.getElementById("lowercase").innerHTML =
-            "Lowercase letter";
-
-        document.getElementById("lowercase").className = "valid";
-
-    }
-    else {
-
-        document.getElementById("lowercase").innerHTML =
-            "Lowercase letter";
-
-        document.getElementById("lowercase").className = "invalid";
-
-    }
-
-
-    // Number
-
-    if (/[0-9]/.test(password)) {
-
-        document.getElementById("number").innerHTML =
-            "Number";
-
-        document.getElementById("number").className = "valid";
-
-    }
-    else {
-
-        document.getElementById("number").innerHTML =
-            "Number";
-
-        document.getElementById("number").className = "invalid";
-
-    }
-
-
-    // Special character
-
-    if (/[^A-Za-z0-9]/.test(password)) {
-
-        document.getElementById("special").innerHTML =
-            "Special character";
-
-        document.getElementById("special").className = "valid";
-
-    }
-    else {
-
-        document.getElementById("special").innerHTML =
-            "Special character";
-
-        document.getElementById("special").className = "invalid";
-
-    }
+    });
 
 });
 
+
+// Reset Password
 function resetPassword() {
 
     document.getElementById("password").value = "";
+
+    document.getElementById("password").type = "password";
 
     document.getElementById("result").innerHTML = "";
 
     document.getElementById("suggestions").innerHTML = "";
 
-    document.getElementById("length").innerHTML =
-        "At least 8 characters";
-    document.getElementById("length").className = "invalid";
+    let requirements = [
+        ["length", "At least 8 characters"],
+        ["uppercase", "Uppercase letter"],
+        ["lowercase", "Lowercase letter"],
+        ["number", "Number"],
+        ["special", "Special character"]
+    ];
 
-    document.getElementById("uppercase").innerHTML =
-        "Uppercase letter";
-    document.getElementById("uppercase").className = "invalid";
+    requirements.forEach(function (item) {
 
-    document.getElementById("lowercase").innerHTML =
-        "Lowercase letter";
-    document.getElementById("lowercase").className = "invalid";
+        let element = document.getElementById(item[0]);
 
-    document.getElementById("number").innerHTML =
-        "Number";
-    document.getElementById("number").className = "invalid";
+        element.innerHTML = "✗ " + item[1];
+        element.className = "invalid";
 
-    document.getElementById("special").innerHTML =
-        "Special character";
-    document.getElementById("special").className = "invalid";
+    });
+
 }
 
 
+// =================================
+// Strong Password Generator
+// =================================
+
+
+// Update Password Length
+function updateLength() {
+
+    let length = document.getElementById("passwordLength").value;
+
+    document.getElementById("lengthValue").innerHTML = length;
+
+}
+
+
+// Generate Secure Random Number
+function randomNumber(max) {
+
+    let array = new Uint32Array(1);
+
+    let limit = Math.floor(4294967296 / max) * max;
+
+    do {
+        window.crypto.getRandomValues(array);
+    } while (array[0] >= limit);
+
+    return array[0] % max;
+
+}
+
+
+// Generate Strong Password
+function generatePassword() {
+
+    if (!window.crypto || !window.crypto.getRandomValues) {
+
+        alert("Secure password generation is not supported in this browser.");
+        return;
+
+    }
+
+    let length = Number(document.getElementById("passwordLength").value);
+
+    let uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    let lowercase = "abcdefghijklmnopqrstuvwxyz";
+    let numbers = "0123456789";
+    let special = "!@#$%^&*()_+-=[]{}?";
+
+    let allCharacters = uppercase + lowercase + numbers + special;
+
+    let password = [];
+
+    // Add at least one character from each group
+
+    password.push(uppercase[randomNumber(uppercase.length)]);
+    password.push(lowercase[randomNumber(lowercase.length)]);
+    password.push(numbers[randomNumber(numbers.length)]);
+    password.push(special[randomNumber(special.length)]);
+
+
+    // Add remaining random characters
+
+    for (let i = 4; i < length; i++) {
+
+        password.push(allCharacters[randomNumber(allCharacters.length)]);
+
+    }
+
+
+    // Shuffle Password Characters
+
+    for (let i = password.length - 1; i > 0; i--) {
+
+        let j = randomNumber(i + 1);
+
+        let temp = password[i];
+
+        password[i] = password[j];
+
+        password[j] = temp;
+
+    }
+
+
+    // Display Generated Password
+
+    document.getElementById("generatedPassword").value = password.join("");
+
+}
+
+
+// Copy Generated Password
+// Copy Generated Password
+async function copyPassword() {
+
+    let input = document.getElementById("generatedPassword");
+    let password = input.value;
+
+    if (password.length === 0) {
+        alert("Please generate a password first.");
+        return;
+    }
+
+    try {
+
+        await navigator.clipboard.writeText(password);
+
+        input.value = "";
+        alert("Password copied successfully!");
+
+    }
+
+    catch (error) {
+
+        input.select();
+
+        let copied = document.execCommand("copy");
+
+        if (copied) {
+
+            input.value = "";
+            alert("Password copied successfully!");
+
+        } else {
+
+            alert("Unable to copy password. Please copy it manually.");
+
+        }
+
+    }
+
+}
+
+function toggleGenerator() {
+    let panel = document.getElementById("generatorPanel");
+
+    if (panel.style.display === "none") {
+        panel.style.display = "block";
+    } else {
+        panel.style.display = "none";
+    }
+}
